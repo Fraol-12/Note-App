@@ -1,21 +1,20 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 const express = require('express')
-const app = express()
-const port = 5000
+const app = express();
+const port = process.env.PORT || 5000;
 
-app.get('/', (req, res) => {
-  res.send('Hello mf!')
-})
+app.use(express.json()); // Middleware to parse JSON bodies in POST requests
 
-app.listen(port, () => {
-  console.log(`Note app listening on port ${port}`)
-})
+
+const authRoutes = require('./routes/auth');
+
+app.use('/api/auth', require('./routes/auth'));
 
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect('mongodb://localhost:5000/Cluster0', {
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true, // Recommended for the new MongoDB driver
       // Other options can be added here if needed
@@ -27,4 +26,12 @@ const connectDB = async () => {
   }
 };
 
-module.exports = connectDB;
+connectDB();
+
+app.get('/', (req, res) => {
+  res.send('Hello mf!');
+});
+
+app.listen(port, () => {
+  console.log(`🚀 Note app listening on port ${port}`);
+});
