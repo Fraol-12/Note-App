@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express')
 const app = express();
 const port = process.env.PORT || 5000;
+const protect = require('./middleware/authMiddleware');
 
 app.use(express.json()); // Middleware to parse JSON bodies in POST requests
 
@@ -10,6 +11,7 @@ app.use(express.json()); // Middleware to parse JSON bodies in POST requests
 const authRoutes = require('./routes/auth');
 
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/notes', require('./routes/notes'));
 
 
 const connectDB = async () => {
@@ -27,6 +29,17 @@ const connectDB = async () => {
 };
 
 connectDB();
+
+
+  // Example protected route
+  app.get('/api/protected', protect, (req, res) => {
+      res.json({ message: `Welcome, user ${req.user.id}! This is a protected route.` });
+  });
+
+  // Other routes
+  app.get('/api/public', (req, res) => {
+      res.json({ message: 'This is a public route.' });
+  });
 
 app.get('/', (req, res) => {
   res.send('Hello mf!');
