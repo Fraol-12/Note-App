@@ -4,17 +4,42 @@ const Note = require('../models/Note');
 const authMiddleware = require('../middleware/authMiddleware');
 
 router.post('/', authMiddleware, async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    if (!title || !content) {
+      return res.status(400).json({ error: 'Title and content are required' });
+    
+    }
+
     const note = new Note({
     title: req.body.title,
     content: req.body.content,
     user: req.user._id
 });
 await note.save();
-res.json(note);
+res.status(201).json()(note);
+ } catch (err) {
+    console.error('Error creating note:', err.message);
+    res.status(500).json({ error: 'Server error while creating note' });
+ }
+
 });
+
 router.get('/', authMiddleware, async (req, res) => {
+  try { 
     const notes = await Note.find({ user: req.user._id });
+
+    if (!notes || notes.length === 0) {
+      return res.status(404).json({ error: 'No notes found for this user' });
+
+  }
     res.json(notes);
+  } catch (err) {
+    console.error('Error fetching notes:', err.message);
+    res.status(500).json({ error: 'Server error while fetching notes' });
+  }
+    // const notes = await Note.find({ user: req.user._id });
+    // res.json(notes);
 });
 
 

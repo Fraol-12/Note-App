@@ -8,11 +8,12 @@ const protect = require('./middleware/authMiddleware');
 app.use(express.json()); // Middleware to parse JSON bodies in POST requests
 
 
-const authRoutes = require('./routes/auth');
-
+// const authRoutes = require('./routes/auth');
+// Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/notes', require('./routes/notes'));
 
+// Connect to MongoDB
 
 const connectDB = async () => {
   try {
@@ -27,7 +28,6 @@ const connectDB = async () => {
     process.exit(1); // Exit the process with a failure code
   }
 };
-
 connectDB();
 
 
@@ -43,6 +43,15 @@ connectDB();
 
 app.get('/', (req, res) => {
   res.send('Hello mf!');
+});
+
+// 🧱 Global Error Handler (MUST be after all routes)
+app.use((err, req, res, next) => {
+  console.error('🔥 Global Error:', err.stack);
+
+  res.status(err.status || 500).json({
+    error: err.message || 'Internal Server Error',
+  });
 });
 
 app.listen(port, () => {
