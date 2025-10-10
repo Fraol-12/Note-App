@@ -3,6 +3,8 @@ const router = express.Router();
 const Note = require('../models/Note');
 const authMiddleware = require('../middleware/authMiddleware');
 
+
+
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { title, content } = req.body;
@@ -26,22 +28,26 @@ res.status(201).json()(note);
 });
 
 router.get('/', authMiddleware, async (req, res) => {
-  try { 
-    const notes = await Note.find({ user: req.user._id });
+ try {
+  const { search } = req.query;
 
-    if (!notes || notes.length === 0) {
-      return res.status(404).json({ error: 'No notes found for this user' });
+  const query = { user: req.user._id };
 
+  if (search) {
+    query.title = { $regex: search, $options: 'i' };
   }
-    res.json(notes);
-  } catch (err) {
-    console.error('Error fetching notes:', err.message);
-    res.status(500).json({ error: 'Server error while fetching notes' });
-  }
-    // const notes = await Note.find({ user: req.user._id });
-    // res.json(notes);
+
+  const notes = await Note.find(query)
+  .sort({ created: -1 })
+  .limit(50);
+
+  res.json(notes);
+
+ } catch (err) {
+console.error('Error fetching notes:', err.message);
+res.status(400).json({ error: 'Invalid query or server error' });
+ }
 });
-
 
 router.put('/:id', authMiddleware, async (req, res) => {
   const note = await Note.findById(req.params.id);
