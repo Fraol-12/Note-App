@@ -29,7 +29,7 @@ res.status(201).json()(note);
 
 router.get('/', authMiddleware, async (req, res) => {
  try {
-  const { search } = req.query;
+  const { search, filter } = req.query;
 
   const query = { user: req.user._id };
 
@@ -37,11 +37,22 @@ router.get('/', authMiddleware, async (req, res) => {
     query.title = { $regex: search, $options: 'i' };
   }
 
-  const notes = await Note.find(query)
-  .sort({ created: -1 })
-  .limit(50);
+  let noteQuery = Note.find(query).select('title author createdAt');
+  
+  if (filter === 'date') {
+    noteQuery = noteQuery.sort({ createdAt: -1 });
+  }
 
-  res.json(notes);
+  noteQuery = noteQuery.limit(20);
+
+  const notes = await noteQuery;
+if (notes.length === 0) {
+  return res.status(200).json({ message: 'No matching notes found', data: [] });
+
+}
+
+res.status(200).json(notes);
+
 
  } catch (err) {
 console.error('Error fetching notes:', err.message);
