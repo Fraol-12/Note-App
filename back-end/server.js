@@ -55,12 +55,13 @@ app.get('/api/public', (req, res) => {
 
 // 🏠 Root Route
 app.get('/', (req, res) => {
-  res.send('Hello mf!');
+  res.send('Hello mf! am baack');
+
 });
 
 // 🧯 Global Error Handler (must be after all routes)
 app.use((err, req, res, next) => {
-  console.error('🔥 Global Error:', err.stack);
+  console.error(' Global Error:', err.stack);
   res.status(err.status || 500).json({
     error: err.message || 'Internal Server Error',
   });
