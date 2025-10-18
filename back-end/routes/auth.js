@@ -9,10 +9,10 @@ require('dotenv').config();
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { email, password } = req.body;
 
-        if (!username || !email || !password) {
-            return res.status(400).json({ msg: 'Please provide username, email, and password' });
+        if (!email || !password) {
+            return res.status(400).json({ msg: 'Please provide email, and password' });
         }
 
         const existingUser = await User.findOne({ email });
@@ -22,7 +22,7 @@ router.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = new User({ username, email, password: hashedPassword });
+        const user = new User({ email, password: hashedPassword });
         await user.save();
 
         const payload = { user: { id: user.id } };
